@@ -6,7 +6,18 @@ from datetime import datetime
 
 GUI = Tk()
 GUI.title("Program บันทึกค่าใช้จ่าย By Yingnaja V.1.0")
-GUI.geometry('700x550+500+50')
+#GUI.geometry('700x550+500+50')
+
+w = 700
+h = 550
+ws = GUI.winfo_screenwidth()
+hs = GUI.winfo_screenheight()
+
+x = (ws/2) - (w/2)
+y = (hs/2) - (h/2) - 50
+
+GUI.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
+
 
 ####################### MENU BAR #########################
 menubar = Menu(GUI)
@@ -227,7 +238,16 @@ update_table()
 def EditRecord():
     POPUP = Toplevel()  #แทน Tk()
     POPUP.title('Edit Record')
-    POPUP.geometry('400x300')
+    #POPUP.geometry('400x300')
+    w = 400
+    h = 300
+    ws = POPUP.winfo_screenwidth()
+    hs = POPUP.winfo_screenheight()
+
+    x = (ws/2) - (w/2)
+    y = (hs/2) - (h/2) - 50
+
+    POPUP.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
 
     #-------------------------------------
     L = ttk.Label(POPUP, text="รายการค่าใช้จ่าย", font=FONT1).pack()
