@@ -193,7 +193,7 @@ def DeleteRecord(event=None):
         data = resultTable.item(select)
         data = data['values']
         transactionid = data[0]
-        print(transactionid)
+        #print(transactionid)
         del alltransaction[str(transactionid)]
         UpdateCSV()
         update_table()
@@ -222,7 +222,81 @@ def update_table():
 
 update_table()
 
-###########################TAP 2############################
+###########################Right Click Menu############################
+
+def EditRecord():
+    POPUP = Toplevel()  #แทน Tk()
+    POPUP.title('Edit Record')
+    POPUP.geometry('400x300')
+
+    #-------------------------------------
+    L = ttk.Label(POPUP, text="รายการค่าใช้จ่าย", font=FONT1).pack()
+    V_expense = StringVar() # ตัวแปรสำหรับเก็บข้อมูล
+    E1 = ttk.Entry(POPUP, textvariable=V_expense, font=FONT2)
+    E1.pack()
+    #-------------------------------------
+    #-------------------------------------
+    L = ttk.Label(POPUP, text="ราคา(บาท)", font=FONT1).pack()
+    V_price = StringVar() # ตัวแปรสำหรับเก็บข้อมูล
+    E2 = ttk.Entry(POPUP, textvariable=V_price, font=FONT2)
+    E2.pack()
+    #-------------------------------------
+    #-------------------------------------
+    L = ttk.Label(POPUP, text="จำนวน", font=FONT1).pack()
+    V_pic = StringVar() # ตัวแปรสำหรับเก็บข้อมูล
+    E3 = ttk.Entry(POPUP, textvariable=V_pic, font=FONT2)
+    E3.pack()
+    #-------------------------------------
+
+    def Edit():
+        olddata = alltransaction[str(transactionid)]
+        print('LOD: ', olddata)
+        v1 = V_expense.get()
+        v2 = float(V_price.get())
+        v3 = int(V_pic.get())
+        total = v2 * v3
+        newdata = [olddata[0],olddata[1],v1,v2,v3,total]
+        alltransaction[str(transactionid)] = newdata
+        UpdateCSV()
+        update_table()
+        POPUP.destroy()  #คำสั่งปิดป๊อบอัพ
+
+
+    saveicon = PhotoImage(file='save.png')
+    B2 = ttk.Button(POPUP, text='Save',command=Edit, image=saveicon, compound='left')
+    B2.pack(ipadx=5, ipady=5, pady=10)
+
+    # -----get data in selected record---------
+    select = resultTable.selection()
+    #print(select)
+    data = resultTable.item(select)
+    data = data['values']
+    print(data)
+    transactionid = data[0]
+
+    # set ค่าเก่าไว้ในกล่อง
+    V_expense.set(data[2])
+    V_price.set(data[3])
+    V_pic.set(data[4])
+
+
+    POPUP.mainloop()
+    
+
+
+rightclick = Menu(GUI,tearoff=0)
+rightclick.add_command(label='Edit', command=EditRecord)
+rightclick.add_command(label='Delete', command=DeleteRecord)
+
+def menupopup(event):
+    #print(event.x_root, event.y_root)
+    rightclick.post(event.x_root, event.y_root) # คลิกขวาแล้วขึ้นป๊อบอัพ
+
+
+
+resultTable.bind('<Button-3>', menupopup)  # ตำแหน่งที่คลิกขวาแล้วป๊อบอัพ
+
+
 
 
 GUI.bind('<Tab>', lambda x: E2.focus())
