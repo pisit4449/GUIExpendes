@@ -35,33 +35,8 @@ def insert_expense(transactionid,datetimes,title,expense,quantity,total):
         c.execute("""INSERT INTO expenselist VALUES (?,?,?,?,?,?,?)""",
         (ID,transactionid,datetimes,title,expense,quantity,total))
     conn.commit()  #การบันทึกข้อมูลลงฐานข้อมูลถ้าไม่รันตัวนี้จะไม่บันทึก
-    # print('Insert Success!')
+    print('Insert Success!')
 
-def show_expense():
-    with conn:
-        c.execute("SELECT * FROM expenselist")
-        expense = c.fetchall()  # คำสั่งให้ดึงข้อมูลเข้ามา
-        #print(expense)
-    
-    return expense
-
-def update_expense(transactionid,title,expense,quantity,total):
-    with conn:
-        c.execute("""UPDATE expenselist SET 
-            title=?, 
-            expense=?,
-            quantity=?, 
-            total=? 
-            WHERE transactionid=?""",
-            ([title,expense,quantity,total,transactionid]))
-        conn.commit()
-        #print("Data Updated")
-
-def delete_expense(transactionid):
-    with conn:
-        c.execute("DELETE FROM expenselist WHERE transactionid=?",([transactionid]))
-        conn.commit()
-        #print('Data Delete')
 ##################### GUI ##############################################
 
 GUI = Tk()
@@ -90,7 +65,7 @@ filemenu.add_command(label='Import CSV')
 filemenu.add_command(label='Export to googlesheet')
 # Help menu
 def About():
-    #print('About_menu')
+    print('About_menu')
     messagebox.showinfo('About','สวัสดีครับ \n สนใจติต่อ 0897513041')
     
 helpmenu = Menu(menubar,tearoff=0)
@@ -144,7 +119,7 @@ def Save(event=None):
         # today = datetime.now().strftime('%a')
         # dt = datetime.now().strftime('%Y-%m-%d %H: %M: %S')
         # dt = day[today] + '' + dt
-        # print(f"รายการ: {expense} ราคา {price} บาท จำนวน {pic} จาน รวมเป็นเงิน {total} บาท")
+        print(f"รายการ: {expense} ราคา {price} บาท จำนวน {pic} จาน รวมเป็นเงิน {total} บาท")
         text = f'รายการ: {expense} ราคา: {price} บาท \n'
         text = text + f'จำนวน: {pic} รายการ รวมทั้งหมด: {total} บาท'
         v_rerult.set(text)
@@ -153,7 +128,7 @@ def Save(event=None):
         V_pic.set("")
         # บันทึกข้อมูลลง CSV
         today = datetime.now().strftime('%a')
-        # print(today)
+        print(today)
         stamp = datetime.now()
         dt = stamp.strftime('%Y-%m-%d %H:%M:%S')
         transactionid = stamp.strftime('%Y%m%d%H%M%f')
@@ -171,7 +146,7 @@ def Save(event=None):
         E1.focus()
         update_table()
     except:
-        # print('ERROR')
+        print('ERROR')
         #messagebox.showerror('Error', 'คุณกรอกตัวเลขผิด')
         messagebox.showwarning('Error', 'คุณกรอกข้อความผิด')
         V_expense.set("")
@@ -183,7 +158,7 @@ GUI.bind('<Return>', Save) #ต้องเพิ่ม def Save(event=None):
 def Show():
     pic = V_pic.get()
     result = int(price) * int(pic)
-    # print(f"รายการ: {expense} ราคา {price} บาท จำนวน {pic} จาน รวมเป็นเงิน {result} บาท")
+    print(f"รายการ: {expense} ราคา {price} บาท จำนวน {pic} จาน รวมเป็นเงิน {result} บาท")
 
 FONT1 = (None, 16)
 FONT2 = (None, 14)
@@ -258,27 +233,21 @@ def UpdateCSV():
         #เตรียมข้อมูลให้กลายเป็น list
         data = list(alltransaction.values())
         fw.writerows(data)
-        # print('Table was updated')
+        print('Table was updated')
         
-def UpdateSQL():
-    data = list(alltransaction.values())
-    for d in data:
-        update_expense(d[0],d[2],d[3],d[4],d[5]) # d[1] วันที่ ไม่ต้องแก้
-
 
 def DeleteRecord(event=None):
     check = messagebox.askyesno('Confirm','คุณต้องการลบข้อมูลใช่หรือไม่')
     if check==True:
-        #print('dedete')
+        print('dedete')
         select = resultTable.selection()
-        # print(select)
+        print(select)
         data = resultTable.item(select)
         data = data['values']
-        transactionid = data[0] 
+        transactionid = data[0]
         #print(transactionid)
         del alltransaction[str(transactionid)]
-        #UpdateCSV()
-        delete_expense(str(transactionid)) # delete in db
+        UpdateCSV()
         update_table()
     else:
         print('Cancel')
@@ -294,12 +263,12 @@ def update_table():
     resultTable.delete(*resultTable.get_children())
 
     try:
-        data = show_expense()    #read_csv()
+        data = read_csv()
         for d in data:
             #create transaction data
-            alltransaction[d[1]] = d[1:]  # แก้จาก 0 เป็น 1
-            resultTable.insert('',0, value=d[1:])
-        #print('all  ', alltransaction)
+            alltransaction[d[0]] = d
+            resultTable.insert('',0, value=d)
+        print('all  ', alltransaction)
     except:
         print('No file')
 
@@ -349,9 +318,7 @@ def EditRecord():
         total = v2 * v3
         newdata = [olddata[0],olddata[1],v1,v2,v3,total]
         alltransaction[str(transactionid)] = newdata
-        #UpdateCSV()
-        UpdateSQL()
-        #update_expense(olddata[0],olddata[1],v1,v2,v3,total) ใช้วิธีนี้ไม่ต้องมีฟังชั่น UpdatSQL()
+        UpdateCSV()
         update_table()
         POPUP.destroy()  #คำสั่งปิดป๊อบอัพ
 
@@ -365,7 +332,7 @@ def EditRecord():
     #print(select)
     data = resultTable.item(select)
     data = data['values']
-    # print(data)
+    print(data)
     transactionid = data[0]
 
     # set ค่าเก่าไว้ในกล่อง
